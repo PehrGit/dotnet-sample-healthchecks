@@ -30,6 +30,7 @@ public class BookingStateProjection : MongoProjection<BookingDocument> {
     static UpdateDefinition<BookingDocument> HandleRoomBooked(
         IMessageConsumeContext<V1.RoomBooked> ctx, UpdateDefinitionBuilder<BookingDocument> update
     ) {
+        throw new Exception("Demonstration exception");
         var evt = ctx.Message;
 
         return update.SetOnInsert(x => x.Id, ctx.Stream.GetId())

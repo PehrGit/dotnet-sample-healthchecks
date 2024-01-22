@@ -5,6 +5,7 @@ using Eventuous.AspNetCore;
 using Eventuous.Diagnostics.Logging;
 using Eventuous.Spyglass;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using Serilog;
@@ -20,7 +21,7 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft.AspNetCore.Mvc.Infrastructure", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.Console()
-    .WriteTo.Seq("http://localhost:5341")
+    .WriteTo.Seq("http://localhost:15341")
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,23 +36,29 @@ builder.Services.AddTelemetry();
 builder.Services.AddEventuous(builder.Configuration);
 builder.Services.AddEventuousSpyglass();
 
+builder.Services
+    .AddHealthChecks()
+    .AddSubscriptionsHealthCheck("subscriptions", HealthStatus.Unhealthy, new []{"eventuous"});
+
 builder.Services.Configure<JsonOptions>(options
     => options.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb)
 );
 
 var app = builder.Build();
 
+
+app.UseHealthChecks("/hc");
 app.UseSerilogRequestLogging();
 app.UseSwagger().UseSwaggerUI();
 app.MapControllers();
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
-app.MapEventuousSpyglass(null);
+// app.MapEventuousSpyglass(null);
 
 var factory  = app.Services.GetRequiredService<ILoggerFactory>();
 var listener = new LoggingEventListener(factory, "OpenTelemetry");
 
 try {
-    app.Run("http://*:5051");
+    app.Run();
     return 0;
 }
 catch (Exception e) {

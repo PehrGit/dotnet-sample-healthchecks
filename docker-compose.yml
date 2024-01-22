@@ -7,8 +7,8 @@ services:
     image: ghcr.io/eventstore/eventstore:21.10.0-alpha-arm64v8
 #    image: eventstore/eventstore:latest #20.10.2-buster-slim
     ports:
-      - '2113:2113'
-      - '1113:1113'
+      - '12113:2113'
+      - '11113:1113'
     environment:
       EVENTSTORE_INSECURE: 'true'
       EVENTSTORE_CLUSTER_SIZE: 1
@@ -57,7 +57,7 @@ services:
     environment:
       - ACCEPT_EULA=Y
     ports:
-      - "5341:80"
+      - "15341:80"
 
 networks:
   default:

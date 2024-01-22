@@ -45,6 +45,7 @@ public static class Registrations {
         services.AddSubscription<AllStreamSubscription, AllStreamSubscriptionOptions>(
             "BookingsProjections",
             builder => builder
+                .Configure(options => options.ThrowOnError = true)
                 .UseCheckpointStore<MongoCheckpointStore>()
                 .AddEventHandler<BookingStateProjection>()
                 .AddEventHandler<MyBookingsProjection>()
